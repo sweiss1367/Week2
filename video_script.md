@@ -1,138 +1,138 @@
 # Video Presentation Script
-## Real-Time Edge Detection and Morphological Filtering — Robotic Vision System
-### Approximate Duration: 5–7 Minutes
+## Real-Time Edge Detection and Morphological Filtering
+### Target Duration: 4–5 Minutes
 
 ---
 
-## SLIDE 1 — Title (0:00–0:40)
+## [SLIDE 1 — Title and Project Objective]
 
-"Good [morning/afternoon], and welcome to my Week 2 computer vision mini-project presentation.
-My name is [Your Name], and today I'll be walking you through a real-time edge detection
-and morphological filtering system designed for robotic vision applications.
+Hello, my name is [Your Name], and this is my Week 2 computer vision mini-project.
 
-In simple terms, I built a Python program that takes a live video feed from a webcam,
-identifies the boundaries of every object in the frame, cleans up that boundary data,
-and displays it in real time — the kind of capability a robot on a factory floor or in
-a warehouse would need to safely navigate and interact with its environment.
+In this project, I implemented a real-time edge detection and morphological filtering
+system using Python and OpenCV. The script opens a live webcam feed, detects the
+boundaries of objects in each frame, refines those boundaries using filtering operations,
+and displays all four stages of the process simultaneously — in real time.
 
-Let's get into it."
-
----
-
-## SLIDE 2 — The Business Problem (0:40–1:40)
-
-"So why does this matter?
-
-Robots are increasingly being deployed in dynamic environments — warehouses, surgical
-theatres, agriculture, and manufacturing. Unlike a conveyor belt with fixed objects in
-fixed positions, these environments change constantly. A robot that cannot see object
-boundaries in real time simply cannot function safely.
-
-Traditional approaches hardcode the robot's knowledge of its environment, which means
-any unexpected object causes a failure or stoppage. Computer vision solves this by
-letting the robot perceive and adapt.
-
-Edge detection is specifically the technique of finding where one object ends and
-another begins — it extracts the structural information from a camera image without
-needing to understand colour, texture, or depth. And morphological filtering then
-takes those detected edges and cleans them up, removing noise so the robot gets
-reliable, actionable data.
-
-Together, these two techniques form the perception foundation of a modern robotic system."
+The goal was not just to write code that works, but to understand how this kind of
+technology functions as a practical tool inside a robotic system. And that's where I
+want to start — with the business problem this solves.
 
 ---
 
-## SLIDE 3 — Technical Methodology (1:40–3:00)
+## [SLIDE 2 — Business and Robotics Scenario]
 
-"Let me walk you through the eight-step pipeline I built.
+Imagine a robotic arm on a warehouse picking line. Its job is to identify packages,
+calculate where to grip them, and move them accurately — all day, at scale.
 
-Step one: we capture a live frame from the webcam using OpenCV's VideoCapture class.
+The traditional approach is to pre-program the robot with the exact dimensions and
+appearance of every object it might encounter. That works in controlled environments,
+but it breaks down the moment something unexpected appears — a new product, different
+packaging, or an object placed at an unusual angle.
 
-Step two: we convert the colour frame to grayscale. We don't need colour information
-to find edges, and working with a single channel is significantly faster.
+Real-time edge detection changes that. Instead of relying on a static object library,
+the robot uses a camera and a vision pipeline to detect boundaries dynamically, on
+every single frame. It doesn't need to be told what an object looks like in advance —
+it figures out the shape from the live image.
 
-Step three: we apply a Gaussian blur — think of this as a light smoothing pass that
-removes pixel-level noise that would otherwise be misidentified as edges.
-
-Step four: Canny edge detection. This is the core algorithm. It calculates the gradient —
-how sharply pixel brightness changes — across the image, and marks as 'edges' any
-location where that gradient exceeds a threshold we set. I used values of 50 and 150
-for the low and high thresholds respectively.
-
-Steps five through seven are the morphological filters. Dilation expands the edges
-slightly, closing small gaps in boundaries. Erosion does the opposite — it shrinks
-edges to remove thin noise filaments. And morphological closing — dilation followed
-by erosion — is the most practical operation for sealing broken contours.
-
-Step eight: we overlay the detected edges onto the original colour frame in green,
-giving a human operator or a downstream algorithm a clear visual of what the system
-has identified."
+That flexibility directly reduces programming costs, speeds up changeovers when
+product lines change, and makes the system more resilient in unpredictable environments.
+That's the business case. Now let me walk you through how the pipeline actually works.
 
 ---
 
-## SLIDE 4 — Visual Results (3:00–4:10)
+## [SLIDE 3 — Real-Time Processing Workflow]
 
-"Here you can see the pipeline in action.
+The pipeline has six steps, and each one is a single function call in OpenCV.
 
-On the left is the raw camera input — in this case a synthetic test scene with
-geometric shapes, used to demonstrate the pipeline without requiring a live camera
-during the presentation.
+First, the script captures a live frame from the webcam. Second, it converts that
+colour frame to grayscale — we only need brightness information to detect edges, not
+colour. Third, it runs Canny edge detection to identify boundaries. Fourth and fifth,
+it applies dilation and erosion to clean and refine the edge map. And sixth, it
+displays all four outputs live on screen.
 
-In the centre is the Canny edge map — a binary image where every white pixel
-represents a detected boundary. You can see the outlines of all three shapes are
-clearly captured.
-
-On the right is the final overlay — the edges are projected back onto the colour
-image in green. This is the format a robot's control system would receive.
-
-Notice that the curves of the circle, the corners of the rectangle, and the
-diagonal lines are all accurately captured. In a real deployment, this data
-feeds directly into the robot's decision engine — telling it where it can
-safely reach, grip, or navigate."
+The entire sequence runs fast enough to keep up with a standard webcam at full frame
+rate, on a laptop CPU, with no specialist hardware. That's an important point —
+practical deployment doesn't require expensive infrastructure.
 
 ---
 
-## SLIDE 5 — Morphological Filtering Comparison (4:10–5:10)
+## [SLIDE 4 — Canny Edge Detection]
 
-"This slide compares the three morphological outputs side by side.
+Canny edge detection works by analysing how sharply brightness changes between
+neighbouring pixels. Where that change is strong — at the edge of a hand, the corner
+of a box, the outline of an object — those pixels get marked as boundaries. Where the
+image is smooth or uniform, nothing is marked.
 
-On the left, the raw Canny edges — accurate but sometimes containing small
-breaks or noise pixels at the boundaries.
+The result is a clean black-and-white image: a dark background with white lines
+tracing every detected boundary in the scene. Colour, texture, and depth are all gone.
+What remains is pure structure — which is exactly what a robot needs to determine
+where one object ends and another begins.
 
-In the middle, after dilation — the edges are thicker and any small gaps in
-the contour have been filled in. This is important when the robot needs a
-complete, unbroken boundary to compute an accurate grip point.
-
-On the right, after erosion — the edges are thinner and cleaner. Stray noise
-pixels that don't belong to any real boundary have been eliminated.
-
-The choice of which morphological operation to apply depends on the application.
-In most robotic perception tasks, morphological closing — the combination of
-dilation then erosion — gives the best result: gaps are filled, and the
-overall boundary doesn't grow larger than the real object."
+I set the detection thresholds at 100 and 200, which are well-suited to a general
+scene with natural lighting. Lower thresholds would capture more edges, including noise;
+higher thresholds would focus only on the most prominent boundaries.
 
 ---
 
-## SLIDE 6 — Conclusion & Business Value (5:10–6:00)
+## [SLIDE 5 — Morphological Operations: Dilation and Erosion]
 
-"To wrap up — what did this project demonstrate, and why does it matter?
+The raw Canny output is accurate, but not always complete. Two problems come up in
+practice. First, low-contrast areas can create small gaps in an otherwise continuous
+boundary. Second, noise in the image can produce stray edge pixels that don't
+correspond to any real object.
 
-First, the technical result: a fully working, real-time vision pipeline that
-runs at over 30 frames per second on standard laptop hardware. No GPU required.
+Dilation addresses the first problem. It expands each edge pixel outward using a
+5-by-5 kernel, which closes those gaps and produces a more connected, complete contour.
+For a robot calculating a grip point, a broken outline is a real operational risk —
+dilation removes that risk.
 
-Second, the business result: this kind of system directly reduces the cost of
-deploying adaptive robots. Instead of reprogramming a robot every time the
-environment changes, you give it eyes that adapt automatically.
+Erosion addresses the second problem. It shrinks each edge pixel inward, stripping
+away thin noise filaments while preserving the genuine boundaries. This reduces false
+positives — edges the robot might otherwise act on that don't represent real surfaces.
 
-Third, extensibility: the modular pipeline I built can be extended to add object
-classification, depth estimation, or path planning without restructuring the core code.
-
-The natural next step is integration with a ROS2 robotic controller, which would
-close the loop between perception and action — the robot sees an edge, computes
-a trajectory, and moves accordingly.
-
-Thank you for your time. I'm happy to take any questions."
+Together, dilation and erosion move the edge map from accurate to reliable. And in
+a live robotic system, reliability is what determines whether the robot performs
+correctly under real-world conditions.
 
 ---
 
-*[End of script — estimated delivery time: 5 minutes 45 seconds at a measured pace]*
+## [SLIDE 6 — Results and Observations]
+
+When I ran the script, all four windows updated in real time with no visible lag.
+The original frame showed the live colour feed. The Canny window showed clean white
+boundary lines against a black background, accurately tracing the shapes of every
+object in frame. The dilated output showed visibly thicker, more connected contours,
+and the eroded output showed finer, cleaner lines with noise removed.
+
+What struck me most was how much information gets stripped away at the Canny stage —
+and how useful that stripped-down image actually is. A robot doesn't need to see what
+I see. It needs a structured, actionable representation of the scene, and that's
+exactly what this pipeline produces.
+
+From a business perspective, the result I found most significant is that the entire
+system ran on a standard laptop with no GPU. That means the cost barrier to deploying
+this kind of adaptive robotic vision is genuinely low — accessible to small and
+mid-size operations, not just large enterprises with specialist infrastructure.
+
+---
+
+## [SLIDE 7 — References]
+
+The technical foundation for this project comes from a small set of well-established
+sources. John Canny's 1986 paper introduced the edge detection algorithm that remains
+the industry standard today — a strong indicator of how robust the underlying method
+is. González and Woods provided the framework for understanding morphological
+operations, and Bradski and Kaehler served as the practical reference for OpenCV
+implementation. Full citations are included in the project's reference file.
+
+To close — this project gave me a working understanding of how computer vision
+translates raw camera input into structured, decision-ready data. The pipeline is
+modular, runs on accessible hardware, and can be extended to support object
+classification, depth estimation, or integration with a robotic controller as a
+natural next step.
+
+Thank you for watching. I'm happy to take any questions.
+
+---
+
+*[End of script — estimated delivery time: 4 minutes 30 seconds at a natural speaking pace]*
